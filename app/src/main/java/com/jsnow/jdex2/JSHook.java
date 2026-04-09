@@ -32,7 +32,7 @@ public class JSHook implements IXposedHookLoadPackage {
     private static String TAG = "JDex2";
     private static String ErrTAG = "JDex2 Error";
     private static String DebugTag = "JDex2 Debugger";
-    private static final String SO1_PATH = "/data/local/tmp/libjdex2.so";
+    private static String SO_PATH = "/data/data/";
 
     private static boolean innerclassesFilter = false;
     private static boolean nativeLoaded = false;
@@ -64,12 +64,12 @@ public class JSHook implements IXposedHookLoadPackage {
 //            "com.baidu.location",
     };
 
-    private static synchronized void ensureNativeLoaded() {
+    private static synchronized void ensureNativeLoaded(XC_LoadPackage.LoadPackageParam loadPackageParam) {
         if (nativeLoaded)
             return;
         try {
-            System.load(SO1_PATH);
-            Log.e(TAG, "Native loaded: " + SO1_PATH);
+            System.load(SO_PATH + loadPackageParam.packageName + "/lib/libjdex2.so");
+            Log.e(TAG, "Native loaded: " + SO_PATH + loadPackageParam.packageName + "/lib/libjdex2.so");
             nativeLoaded = true;
         } catch (Throwable t) {
             Log.e(ErrTAG, "Load Library failed", t);
@@ -186,6 +186,9 @@ public class JSHook implements IXposedHookLoadPackage {
 
     private String[] getAllClassName(DexFile dexFile, List<String> whiteList, List<String> blackList) {
         Object mCookie = XposedHelpers.getObjectField(dexFile, "mCookie");
+        if(mCookie==null){
+            return null;
+        }
         String[] classes = (String[]) XposedHelpers.callStaticMethod(
                 DexFile.class, "getClassNameList", mCookie);
         List<String> filtered = new ArrayList<>();
@@ -309,8 +312,6 @@ public class JSHook implements IXposedHookLoadPackage {
         new Thread(() -> {
             try {
                 Thread.sleep(3000);
-                ensureNativeLoaded();
-                if (!nativeLoaded) return;
                 doDump(loader, outDir, whiteList, blackList);
                 dumped.set(true);
             } catch (Throwable t) {
@@ -328,6 +329,9 @@ public class JSHook implements IXposedHookLoadPackage {
                     continue;
                 }
                 String[] names = getAllClassName(dexFile, whiteList, blackList);
+                if(names == null){
+                    return;
+                }
                 if(invokeConstructors){
                     invokeAllConstructors(names, loader, blackList);
                 }
@@ -368,7 +372,7 @@ public class JSHook implements IXposedHookLoadPackage {
         try (InputStream input = new FileInputStream("/data/data/" + loadPackageParam.packageName + "/files/config.properties")) {
                 props.load(input);
         } catch (Throwable e){
-//            Log.e(ErrTAG, "Load config failed!" + e);
+            Log.e(ErrTAG, "Load config failed!" + e);
         }
 
         String targetApp = props.getProperty("targetApp");
@@ -416,7 +420,7 @@ public class JSHook implements IXposedHookLoadPackage {
         // 为了应对Native层进行Load导致某些类脱不全的情况，但是Hook方法会更容易被检测到
         if (hook) {
             Log.e(TAG, "Dump Dex By Hook");
-            ensureNativeLoaded();
+            ensureNativeLoaded(loadPackageParam);
             if (!nativeLoaded) return;
 
             final AtomicBoolean dumped = new AtomicBoolean(false);
@@ -472,7 +476,7 @@ public class JSHook implements IXposedHookLoadPackage {
                         return;
                     }
                     Log.e(TAG, "Fallback: dumping from lpparam.classLoader");
-                    ensureNativeLoaded();
+                    ensureNativeLoaded(loadPackageParam);
                     if (!nativeLoaded) return;
 
                     ClassLoader cl = loadPackageParam.classLoader;
@@ -496,9 +500,10 @@ public class JSHook implements IXposedHookLoadPackage {
                 @Override
                 public void run() {
                     try {
+
                         // sleep 10秒，等待壳加载结束
                         Thread.sleep(10000);
-                        ensureNativeLoaded();
+                        ensureNativeLoaded(loadPackageParam);
                         if (!nativeLoaded) {
                             Log.e(TAG, "Native library not loaded, abort!");
                             return;
@@ -519,6 +524,9 @@ public class JSHook implements IXposedHookLoadPackage {
                                     continue;
                                 }
                                 String[] names = getAllClassName(dexFile, whiteList, blackList);
+                                if(names == null){
+                                    continue;
+                                }
                                 if (invokeConstructors) {
                                     // 只有未 dump 过的 DEX 才需要主动调用触发回填
                                     invokeAllConstructors(names, (BaseDexClassLoader) realLoader, blackList);
