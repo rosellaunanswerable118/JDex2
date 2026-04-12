@@ -10,11 +10,11 @@
 
 ## 使用方法简介
 
-由于配置文件存在本地，且高版本Android对读写的限制比较严，需要Root权限
+以根据不同Android版本的特性，适配不同版本下配置文件写入的情况，无需Root权限
 
-`MainActivity`中有如下配置，会根据输入将配置写到`/data/data/package.name/files/config.properties`路径下，也可以手动编辑，除了目标包名，其它配置多个路径可以通过`,`间隔
+`MainActivity`中有如下配置，会根据输入将配置写到`/sdcard/Android/data/package.name/files/config.properties`路径下，也可以手动编辑，除了目标包名，其它配置多个路径可以通过`,`间隔
 
-dump后的dex位于`/data/data/app包名/dumpDex/`下
+dump后的dex位于`/sdcard/Android/data/包名/dumpDex/`下
 
 白名单和黑名单只是不做主动调用，但是仍然会进行dump
 
