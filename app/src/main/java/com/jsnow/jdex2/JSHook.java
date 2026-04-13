@@ -39,6 +39,7 @@ public class JSHook implements IXposedHookLoadPackage {
     private static boolean nativeLoaded = false;
     private static boolean invokeDebugger = false;
     private static boolean invokeConstructors = false;
+    private static boolean lazyDump = false;
     private final HashSet<DexFile> dumpedDexFiles = new HashSet<>();
 
     private static final String[] CLASS_FILTER_PREFIXES = {
@@ -273,7 +274,9 @@ public class JSHook implements IXposedHookLoadPackage {
 
                 Constructor<?>[] constructors = clazz.getDeclaredConstructors();
                 if (constructors.length == 0) continue;
-
+                if(lazyDump) {
+                    Thread.sleep(500);
+                }
                 // 选择任意一个构造方法即可
                 Constructor<?> target = constructors[0];
                 target.setAccessible(true);
@@ -395,6 +398,7 @@ public class JSHook implements IXposedHookLoadPackage {
         boolean hook = Boolean.parseBoolean(props.getProperty("hook"));
         innerclassesFilter = Boolean.parseBoolean(props.getProperty("innerclassesFilter"));
         invokeConstructors = Boolean.parseBoolean(props.getProperty("invokeConstructors"));
+        lazyDump = Boolean.parseBoolean(props.getProperty("lazyDump"));
 
         // 使用","分隔多个黑名单/白名单字符串
         // 使用白名单进行类的筛选，避免触发其它无法预知的逻辑导致App崩溃（也可以不设置白名单和黑名单进行脱壳）

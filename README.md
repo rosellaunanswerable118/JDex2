@@ -12,7 +12,7 @@
 
 以根据不同Android版本的特性，适配不同版本下配置文件写入的情况，无需Root权限
 
-`MainActivity`中有如下配置，会根据输入将配置写到`/sdcard/Android/data/package.name/files/config.properties`路径下，也可以手动编辑，除了目标包名，其它配置多个路径可以通过`,`间隔
+`MainActivity`中有如下配置，会根据输入将配置写到`/sdcard/Android/data/package.name/files/config.properties`路径下。配置文件也可以手动编辑，除了目标包名，其它配置多个路径可以通过`,`间隔
 
 dump后的dex位于`/sdcard/Android/data/包名/dumpDex/`下
 
@@ -30,6 +30,7 @@ dump后的dex位于`/sdcard/Android/data/包名/dumpDex/`下
 * Hook：使用Hook方式脱壳（不推荐使用）
 * innerClassesFilter：由于可能导致 JNI 引用数量过多，可以尝试关闭对内部类的主动调用，但是对某些壳，脱出来的匿名类依旧是空的，按需开启，建议使用黑名单过滤而不是本配置
 * **invokeConstructors：是否进行主动调用脱壳**
+* lazyDump：用于在筛选出导致闪退类的大致范围之后通过白名单进行主动调用筛选时，降低主动调用速度，以便更快的找到导致闪退的类/包
 
 如果使用的是Lsposed，**记得在Lsposed中勾选对应APP**
 
